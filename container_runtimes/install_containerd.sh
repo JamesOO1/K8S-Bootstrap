@@ -33,8 +33,11 @@ sudo apt update -y
 echo "[5/6] Installing containerd..."
 sudo apt install -y containerd.io
 
-echo "[6/6] Enabling and starting containerd..."
-sudo systemctl enable containerd
-sudo systemctl start containerd
+echo "[6/6] Restarting and enabling containerd..."
+sudo systemctl enable --now containerd
 
-echo "Installation complete. Verify with: sudo systemctl status containerd"
+echo "Done. Version:"
+containerd --version
+
+echo "Verification:"
+echo "  sudo systemctl status containerd --no-pager"
