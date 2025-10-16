@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # configure_containerd.sh
 # Generate CRI-enabled config for containerd with systemd cgroups.
-# DISCLAIMER: Run at your own risk. No liability assumed.
+# DISCLAIMER: Run at your own risk. The author assumes no liability for any damage or data loss.
 #
-# Assumptions: Sudo is installed
+#
+# Assumptions: sudo is installed
 #
 # Tested on: Debian 13.1
 set -e
