@@ -31,14 +31,10 @@ net.ipv4.ip_forward = 1
 EOF
 sudo sysctl --system >/dev/null
 
-echo "[4/6] Setting iptables backend to nft (default on modern Debian)..."
-sudo update-alternatives --set iptables /usr/sbin/iptables-nft || true
-sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-nft || true
-
-echo "[5/6] Ensuring directories for CNI exist..."
+echo "[4/5] Ensuring directories for CNI exist..."
 sudo mkdir -p /etc/cni/net.d /opt/cni/bin
 
-echo "[6/6] Verifying kernel modules and sysctl settings..."
+echo "[5/5] Verifying kernel modules and sysctl settings..."
 lsmod | grep -E 'br_netfilter|overlay' || echo "Warning: required modules not loaded"
 sudo sysctl net.bridge.bridge-nf-call-iptables net.ipv4.ip_forward
 
