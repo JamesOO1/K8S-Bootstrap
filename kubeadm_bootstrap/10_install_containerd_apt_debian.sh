@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 10_INSTALL_CONTAINERD_APT
+# 10_install_containerd_apt_debian.sh
 #
 # Script to install containerd. Built for Debian
 # Returns 1 if an error was encounterd
