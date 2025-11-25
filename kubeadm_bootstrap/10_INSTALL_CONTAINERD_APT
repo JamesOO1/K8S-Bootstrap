@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# 05_INSTALL_CONTAINERD_APT.sh
+#
+# Script to install containerd. Built for Debian
+# Returns 1 if an error was encounterd
+# Returns 0 if successfully executed
+# Note: Most non-local requirements (network requirements) are out of scope of this script.
+# Process outlined here: https://github.com/containerd/containerd/blob/main/docs/getting-started.md
+#
+# This script requires these commands:
+# dpkg (Usually only Debian distros), uname, curl
+
+
+# Step 1: Get the Download URL
+DEFAULT_VERSION="2.2.0"
+VERSION="${1:-$DEFAULT_VERSION}"
+CPU_ARCHITECTURE=$(dpkg --print-architecture)
+OS=$(uname -s)
+
+DOWNLOAD_URL="https://github.com/containerd/containerd/releases/download/v$VERSION/containerd-$VERSION-$OS-$CPU_ARCHITECTURE.tar.gz"
+CHECKSUM_URL="https://github.com/containerd/containerd/releases/download/v$VERSION/containerd-$VERSION-$OS-$CPU_ARCHITECTURE.tar.gz.sha256sum"
+
+# Step 2: Download Containerd
+
+echo "Downloading Containerd"
+curl -fL "$DOWNLOAD_URL" -o "/tmp/containerd-$VERSION-${OS,,}-$CPU_ARCHITECTURE.tar.gz"
+curl -fL "$CHECKSUM_URL" -o "/tmp/containerd-$VERSION-${OS,,}-$CPU_ARCHITECTURE.tar.gz.sha256sum"
