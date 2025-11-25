@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # 00_check__local_kubeadm_prerequsities.sh
 #
 # Script to check some prerequisities for installing kubeadm.
@@ -7,7 +8,7 @@
 # KubeAdm Requirements outlined here: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 # 
 # This script requires these commands:
-# free, awk, echo, return, if/else/fi, grep, sort, cut, end
+# free, awk, echo, return, if/else/fi, grep, sort, cut, end, for/do/break/done
 
 
 # 1: 2 GB or more of RAM per machine (any less will leave little room for your apps).
