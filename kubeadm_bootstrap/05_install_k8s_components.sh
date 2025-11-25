@@ -6,7 +6,7 @@
 # Process outlined here: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#k8s-install-0
 # 
 # This script requires these commands:
-# apt-get, sudo
+# apt-get, sudo, mkdir, curl, echo, systemctl, apt-mark
 
 # Step 1: "Update the apt package index and install packages needed to use the Kubernetes apt repository:"
 sudo apt-get update
