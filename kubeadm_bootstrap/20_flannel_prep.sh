@@ -15,8 +15,12 @@
 echo "------------------------------------------------------"
 echo "Load br_netfilter module
 echo "------------------------------------------------------"
-echo "br_netfilter" | sudo tee /etc/modules-load.d/br_netfilter.conf
+cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf >/dev/null
+overlay
+br_netfilter
+EOF
 sudo modprobe br_netfilter
+sudo modprobe overlay
 
 #
 
