@@ -11,14 +11,23 @@
 
 
 
-# 1. Disable Swap Space
+# 1. Enable br_netfilter, bridge-nf-call-iptables, and ip_forward
 echo "------------------------------------------------------"
-echo "Disabling Swap Space"
+echo "Load br_netfilter module
 echo "------------------------------------------------------"
-cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf >/dev/null
-net.ipv4.ip_forward = 1
-EOF
-sudo sysctl --system >/dev/null
+echo "br_netfilter" | sudo tee /etc/modules-load.d/br_netfilter.conf
+sudo modprobe br_netfilter
+
+#
+
+echo "------------------------------------------------------"
+echo "Enable ip_forward, iptable, and ip6tables.
+echo "------------------------------------------------------"
+echo "net.ipv4.ip_forward = 1" | sudo tee -a /etc/sysctl.conf
+echo "net.bridge.bridge-nf-call-iptables=1" | sudo tee -a /etc/sysctl.conf
+echo "net.bridge.bridge-nf-call-ip6tables=1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl --system
+
 
 #net.bridge.bridge-nf-call-iptables = 1
 #net.bridge.bridge-nf-call-ip6tables = 1
