@@ -21,7 +21,16 @@ sudo kubeadm init \
   --service-cidr="$SERVICE_CIDR" \
   --cri-socket=unix:///var/run/containerd/containerd.sock
 
-# 2. Apply the Flannel Conf
+  
+# 2. Setup Kubeconfig for current user
+echo "------------------------------------------------------"
+echo "Setting up kubeconfig"
+echo "------------------------------------------------------"
+mkdir -p "$HOME/.kube"
+sudo cp /etc/kubernetes/admin.conf "$HOME/.kube/config"
+sudo chown "$(id -u)":"$(id -g)" "$HOME/.kube/config"
+
+# 3. Apply the Flannel Conf
 echo "------------------------------------------------------"
 echo "Apply the Flannel Conf"
 echo "------------------------------------------------------"
