@@ -7,7 +7,7 @@
 # Process outlined here: 
 #
 # This script requires these commands:
-# swapoff, sed, rm, sudos, systemctl
+# modprobe, sudo, tee, echo, sysctl
 
 
 
