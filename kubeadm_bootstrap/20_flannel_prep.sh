@@ -13,7 +13,7 @@
 
 # 1. Enable br_netfilter, bridge-nf-call-iptables, and ip_forward
 echo "------------------------------------------------------"
-echo "Load br_netfilter module
+echo "Load br_netfilter module"
 echo "------------------------------------------------------"
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf >/dev/null
 overlay
@@ -25,7 +25,7 @@ sudo modprobe overlay
 #
 
 echo "------------------------------------------------------"
-echo "Enable ip_forward, iptable, and ip6tables.
+echo "Enable ip_forward, iptable, and ip6tables."
 echo "------------------------------------------------------"
 echo "net.ipv4.ip_forward = 1" | sudo tee -a /etc/sysctl.conf
 echo "net.bridge.bridge-nf-call-iptables=1" | sudo tee -a /etc/sysctl.conf
