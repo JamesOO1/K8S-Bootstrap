@@ -4,7 +4,7 @@
 # Script to do misc OS prep.
 # Returns 1 if an error was encounterd
 # Returns 0 if successfully executed
-# Process outlined here: https://github.com/containerd/containerd/blob/main/docs/getting-started.md
+# Process outlined here:
 #
 # This script requires these commands:
 # swapoff, sed, rm, sudos, systemctl
