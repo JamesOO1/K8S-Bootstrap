@@ -7,7 +7,7 @@
 # Process outlined here: https://github.com/containerd/containerd/blob/main/docs/getting-started.md
 #
 # This script requires these commands:
-# dpkg (Usually only Debian distros), uname, curl, sha256sum, tar, mkdir, dirname, systemctl, install
+# dpkg (Usually only Debian distros), uname, curl, sha256sum, tar, mkdir, dirname, systemctl, install, basename
 
 
 # Step 1: Get the Download URL
@@ -29,26 +29,27 @@ curl -fL "$CHECKSUM_URL" -o "/tmp/containerd-$CONTAINERD_VERSION-${OS,,}-$CPU_AR
 
 # Step 3: Verify Containerd Checksum
 
-if ! sha256sum --check "/tmp/containerd-$CONTAINERD_VERSION-${OS,,}-$CPU_ARCHITECTURE.tar.gz.sha256sum"; then
+if ! ( cd /tmp && sha256sum --check "/tmp/containerd-$CONTAINERD_VERSION-${OS,,}-$CPU_ARCHITECTURE.tar.gz.sha256sum"); then
     echo "------------------------------------------------------"
     echo "ERROR: Checksum Check Failed. Exiting"
     echo "------------------------------------------------------"
+    exit 1
 fi
 
 # Step 4: Extracting containerd to /usr/local
 echo "------------------------------------------------------"
 echo "Installing containerd to /usr/local"
 echo "------------------------------------------------------"
-tar Cxzf /usr/local /tmp/containerd-$CONTAINERD_VERSION-${OS,,}-$CPU_ARCHITECTURE.tar.gz
+sudo tar Cxzf /usr/local /tmp/containerd-$CONTAINERD_VERSION-${OS,,}-$CPU_ARCHITECTURE.tar.gz
 
 # Step 5: Install systemd service
 echo "------------------------------------------------------"
 echo "Installing containerd systemd service"
 echo "------------------------------------------------------"
-mkdir -p "$(dirname "/usr/local/lib/systemd/system/containerd.service")"
-curl -fL "https://raw.githubusercontent.com/containerd/containerd/main/containerd.service" -o "/usr/local/lib/systemd/system/containerd.service" -sS
-systemctl daemon-reload
-systemctl enable --now containerd
+sudo mkdir -p "$(dirname "/usr/local/lib/systemd/system/containerd.service")"
+sudo curl -fL "https://raw.githubusercontent.com/containerd/containerd/main/containerd.service" -o "/usr/local/lib/systemd/system/containerd.service" -sS
+sudo systemctl daemon-reload
+sudo systemctl enable --now containerd
 
 # Step 6: Download runc
 
@@ -66,18 +67,20 @@ if [[ -z "$(grep -E "[[:space:]]runc.$CPU_ARCHITECTURE$" "/tmp/runc.sha256sum" |
     echo "------------------------------------------------------"
     echo "No checksum entry found for runc.${CPU_ARCHITECTURE}. Failing"
     echo "------------------------------------------------------"
+    exit 1
 fi
-if ! echo "$(grep -E "[[:space:]]runc.$CPU_ARCHITECTURE$" "/tmp/runc.sha256sum" || true)" | sha256sum --check --status; then
+if ! (cd /tmp && echo "$(grep -E "[[:space:]]runc.$CPU_ARCHITECTURE$" "/tmp/runc.sha256sum" || true)" | sha256sum --check --status); then
     echo "------------------------------------------------------"
     echo "ERROR: Checksum Check Failed. Exiting"
     echo "------------------------------------------------------"
+    exit 1
 fi
 
 # Step 8: Install Runc
 echo "------------------------------------------------------"
 echo "Installing Runc"
 echo "------------------------------------------------------"
-install -m 755 /tmp/runc.$CPU_ARCHITECTURE /usr/local/sbin/runc
+sudo install -m 755 /tmp/runc.$CPU_ARCHITECTURE /usr/local/sbin/runc
 
 # Step 9: Downloading CNI Plugins
 DEFAULT_CNI_VERSION="1.8.0"
@@ -94,15 +97,16 @@ curl -fL "$CHECKSUM_URL" -o "/tmp/cni-plugins-${OS,,}-$CPU_ARCHITECTURE-v$CNI_VE
 
 
 # Step 9: Verify CNI Checksum
-if ! sha256sum --check "/tmp/cni-plugins-${OS,,}-$CPU_ARCHITECTURE-v$CNI_VERSION.tgz.sha256"; then
+if ! (cd /tmp && sha256sum --check "/tmp/cni-plugins-${OS,,}-$CPU_ARCHITECTURE-v$CNI_VERSION.tgz.sha256"); then
     echo "------------------------------------------------------"
     echo "ERROR: Checksum Check Failed. Exiting"
     echo "------------------------------------------------------"
+    exit 1
 fi
 
 # Step 9: Install CNI Plugins
 echo "------------------------------------------------------"
 echo "Downloading CNI Plugins"
 echo "------------------------------------------------------"
-mkdir -p /opt/cni/bin
-tar Cxzf /opt/cni/bin  "/tmp/cni-plugins-${OS,,}-$CPU_ARCHITECTURE-v$CNI_VERSION.tgz"
+sudo mkdir -p /opt/cni/bin
+sudo tar Cxzf /opt/cni/bin  "/tmp/cni-plugins-${OS,,}-$CPU_ARCHITECTURE-v$CNI_VERSION.tgz"
