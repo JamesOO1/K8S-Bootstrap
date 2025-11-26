@@ -27,9 +27,11 @@ sudo modprobe overlay
 echo "------------------------------------------------------"
 echo "Enable ip_forward, iptable, and ip6tables."
 echo "------------------------------------------------------"
-echo "net.ipv4.ip_forward = 1" | sudo tee -a /etc/sysctl.conf
-echo "net.bridge.bridge-nf-call-iptables=1" | sudo tee -a /etc/sysctl.conf
-echo "net.bridge.bridge-nf-call-ip6tables=1" | sudo tee -a /etc/sysctl.conf
+cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes.conf >/dev/null
+net.ipv4.ip_forward = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+EOF
 sudo sysctl --system
 
 
