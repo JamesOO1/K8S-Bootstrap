@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# 10_install_containerd_apt_debian.sh
+#
+# Script to install containerd. Built for Debian
+# Returns 1 if an error was encounterd
+# Returns 0 if successfully executed
+# Process outlined here: https://github.com/containerd/containerd/blob/main/docs/getting-started.md
+#
+# This script requires these commands:
+# dpkg (Usually only Debian distros), uname, curl, sha256sum, tar, mkdir, dirname, systemctl, install, basename
+
+
+# Step 1: Get the Download URL
+DEFAULT_CONTAINERD_VERSION="2.2.0"
+CONTAINERD_VERSION="${1:-$DEFAULT_CONTAINERD_VERSION}"
+CPU_ARCHITECTURE=$(dpkg --print-architecture)
+OS=$(uname -s)
+
+DOWNLOAD_URL="https://github.com/containerd/containerd/releases/download/v$CONTAINERD_VERSION/containerd-$CONTAINERD_VERSION-$OS-$CPU_ARCHITECTURE.tar.gz"
+CHECKSUM_URL="https://github.com/containerd/containerd/releases/download/v$CONTAINERD_VERSION/containerd-$CONTAINERD_VERSION-$OS-$CPU_ARCHITECTURE.tar.gz.sha256sum"
+
+# Step 2: Download Containerd
+
+echo "------------------------------------------------------"
+echo "Downloading Containerd"
+echo "------------------------------------------------------"
+curl -fL "$DOWNLOAD_URL" -o "/tmp/containerd-$CONTAINERD_VERSION-${OS,,}-$CPU_ARCHITECTURE.tar.gz" -sS
+curl -fL "$CHECKSUM_URL" -o "/tmp/containerd-$CONTAINERD_VERSION-${OS,,}-$CPU_ARCHITECTURE.tar.gz.sha256sum"  -sS
+
+# Step 3: Verify Containerd Checksum
+
+if ! ( cd /tmp && sha256sum --check "/tmp/containerd-$CONTAINERD_VERSION-${OS,,}-$CPU_ARCHITECTURE.tar.gz.sha256sum"); then
+    echo "------------------------------------------------------"
+    echo "ERROR: Checksum Check Failed. Exiting"
+    echo "------------------------------------------------------"
+    exit 1
+fi
+
+# Step 4: Extracting containerd to /usr/local
+echo "------------------------------------------------------"
+echo "Installing containerd to /usr/local"
+echo "------------------------------------------------------"
+sudo tar Cxzf /usr/local /tmp/containerd-$CONTAINERD_VERSION-${OS,,}-$CPU_ARCHITECTURE.tar.gz
+
+# Step 5: Install systemd service
+echo "------------------------------------------------------"
+echo "Installing containerd systemd service"
+echo "------------------------------------------------------"
+sudo mkdir -p "$(dirname "/usr/local/lib/systemd/system/containerd.service")"
+sudo curl -fL "https://raw.githubusercontent.com/containerd/containerd/main/containerd.service" -o "/usr/local/lib/systemd/system/containerd.service" -sS
+sudo systemctl daemon-reload
+sudo systemctl enable --now containerd
+
+# Step 6: Download runc
+
+DEFAULT_RUNC_VERSION="1.4.0-rc.3"
+RUNC_VERSION="${2:-$DEFAULT_RUNC_VERSION}"
+echo "------------------------------------------------------"
+echo "Downloading Runc"
+echo "------------------------------------------------------"
+curl -fL "https://github.com/opencontainers/runc/releases/download/v$RUNC_VERSION/runc.$CPU_ARCHITECTURE" -o "/tmp/runc.$CPU_ARCHITECTURE" -sS
+curl -fL "https://github.com/opencontainers/runc/releases/download/v$RUNC_VERSION/runc.sha256sum" -o "/tmp/runc.sha256sum" -sS
+
+# Step 7: Verify Runc Checksum
+#If grep command returns nothing (is empty). Fail.
+if [[ -z "$(grep -E "[[:space:]]runc.$CPU_ARCHITECTURE$" "/tmp/runc.sha256sum" || true)" ]]; then
+    echo "------------------------------------------------------"
+    echo "No checksum entry found for runc.${CPU_ARCHITECTURE}. Failing"
+    echo "------------------------------------------------------"
+    exit 1
+fi
+if ! (cd /tmp && echo "$(grep -E "[[:space:]]runc.$CPU_ARCHITECTURE$" "/tmp/runc.sha256sum" || true)" | sha256sum --check --status); then
+    echo "------------------------------------------------------"
+    echo "ERROR: Checksum Check Failed. Exiting"
+    echo "------------------------------------------------------"
+    exit 1
+fi
+
+# Step 8: Install Runc
+echo "------------------------------------------------------"
+echo "Installing Runc"
+echo "------------------------------------------------------"
+sudo install -m 755 /tmp/runc.$CPU_ARCHITECTURE /usr/local/sbin/runc
+
+# Step 9: Downloading CNI Plugins
+DEFAULT_CNI_VERSION="1.8.0"
+CNI_VERSION="${3:-$DEFAULT_CNI_VERSION}"
+DOWNLOAD_URL="https://github.com/containernetworking/plugins/releases/download/v$CNI_VERSION/cni-plugins-$OS-$CPU_ARCHITECTURE-v$CNI_VERSION.tgz"
+CHECKSUM_URL="https://github.com/containernetworking/plugins/releases/download/v$CNI_VERSION/cni-plugins-$OS-$CPU_ARCHITECTURE-v$CNI_VERSION.tgz.sha256"
+
+echo "------------------------------------------------------"
+echo "Downloading CNI Plugins"
+echo "------------------------------------------------------"
+
+curl -fL "$DOWNLOAD_URL" -o "/tmp/cni-plugins-${OS,,}-$CPU_ARCHITECTURE-v$CNI_VERSION.tgz" -sS
+curl -fL "$CHECKSUM_URL" -o "/tmp/cni-plugins-${OS,,}-$CPU_ARCHITECTURE-v$CNI_VERSION.tgz.sha256" -sS
+
+
+# Step 9: Verify CNI Checksum
+if ! (cd /tmp && sha256sum --check "/tmp/cni-plugins-${OS,,}-$CPU_ARCHITECTURE-v$CNI_VERSION.tgz.sha256"); then
+    echo "------------------------------------------------------"
+    echo "ERROR: Checksum Check Failed. Exiting"
+    echo "------------------------------------------------------"
+    exit 1
+fi
+
+# Step 9: Install CNI Plugins
+echo "------------------------------------------------------"
+echo "Downloading CNI Plugins"
+echo "------------------------------------------------------"
+sudo mkdir -p /opt/cni/bin
+sudo tar Cxzf /opt/cni/bin  "/tmp/cni-plugins-${OS,,}-$CPU_ARCHITECTURE-v$CNI_VERSION.tgz"
