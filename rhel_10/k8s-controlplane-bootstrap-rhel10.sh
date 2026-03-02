@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# k8s-bootstrap-rhel10.sh
+# k8s-controlplane-bootstrap-rhel10.sh
 # Idempotent script to prepare a RHEL 10 node for: kubeadm init
 #
 # Target:      RHEL 10 (or compatible: CentOS Stream 10, Rocky 10, Alma 10)
